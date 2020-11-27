@@ -68,23 +68,29 @@ function RefreshAccount (account, since)
   balances = queryPrivate("accounts")
 
   for key, value in pairs(balances) do
-    prices = queryPublic("exchange-rates", "?currency=" .. value["currency"]["code"])
-    if value["type"] == "fiat" then
-      s[#s+1] = {
-        name = value["currency"]["name"],
-        market = market,
-        currency = currency,
-        amount = value["balance"]["amount"]
-      }
-    else
-      s[#s+1] = {
-        name = value["currency"]["name"],
-        market = market,
-        currency = nil,
-        quantity = value["balance"]["amount"],
-        amount = value["native_balance"]["amount"],
-        price = prices["rates"][value["native_balance"]["currency"]]
-      }
+
+    local ccy = value["currency"]["code"]
+
+    if ccy ~= "REPV2" then
+
+      prices = queryPublic("exchange-rates", "?currency=" .. ccy)
+      if value["type"] == "fiat" then
+        s[#s+1] = {
+          name = value["currency"]["name"],
+          market = market,
+          currency = currency,
+          amount = value["balance"]["amount"]
+        }
+      else
+        s[#s+1] = {
+          name = value["currency"]["name"],
+          market = market,
+          currency = nil,
+          quantity = value["balance"]["amount"],
+          amount = value["native_balance"]["amount"],
+          price = prices["rates"][value["native_balance"]["currency"]]
+        }
+      end
     end
   end
 
@@ -128,3 +134,4 @@ function queryPublic(method, query)
 
   return json:dictionary()["data"]
 end
+
